@@ -1,0 +1,24 @@
+#!/usr/bin/bash
+
+cd .. 
+echo "GIT_WORK_TREE: " $PWD
+TOP=$PWD
+cd -
+echo "checking out files..."
+GIT_BRANCH=$(git branch --sort=committerdate | tail -1 | sed 's/^.//')
+# stash pulled files
+GIT_WORK_TREE=$TOP git stash --staged -q
+# stash local modified files 
+GIT_WORK_TREE=$TOP git stash 
+# echo "updating latest origin master"
+# GIT_WORK_TREE=$TOP git pull origin master:master
+GIT_WORK_TREE=$TOP git checkout -qf $GIT_BRANCH
+echo "BRANCH: " $GIT_BRANCH
+GIT_TAG=$(git describe --tags)
+echo "TAG: " $GIT_TAG
+
+# echo "applying stash..."
+# # apply local stash 
+# GIT_WORK_TREE=$TOP git st apply
+
+

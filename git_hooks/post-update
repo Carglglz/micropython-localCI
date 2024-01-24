@@ -1,0 +1,17 @@
+#!/usr/bin/bash
+
+echo "updating remote..."
+git update-server-info
+echo "done."
+
+cd ..
+
+GIT_DIR="${PWD}/.git" 
+
+
+echo "GIT DIR: " $GIT_DIR
+
+LOCAL_CI_PATH="tools/local_ci"
+source .env
+
+$LOCAL_CI_PATH/ci_runner.py
