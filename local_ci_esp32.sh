@@ -1,7 +1,7 @@
 #! /usr/bin/bash
 
 
-LOCAL_CI_PATH="tools/local_ci"
+LOCAL_CI_PATH="../localCI"
 ESP32_FLASH="True"
 ESP32_TEST="True"
 ESP32_TEST_BOARD="esp32"
@@ -34,7 +34,7 @@ function ci_esp32_idf_setup {
 
 function ci_esp32_prebuild_remote {
     # source esp-idf/export.sh
-    make ${MAKEOPTS} -C mpy-cross
+    # make ${MAKEOPTS} -C mpy-cross
     SUBMODULES="lib/berkeley-db-1.xx lib/micropython-lib"
 
     git submodule sync $SUBMODULES
@@ -60,72 +60,73 @@ echo "IDF_PATH:" $IDF_PATH
 
 # BUILD
 
-#TODO: parallelise building different boards
-
 ci_esp32_prebuild_remote
 
-# TODO: multiple boards
-# if $<PORT>_BOARD_RUNNER
-# call board_runner.py --> allow build multiple boards and multiprocessing
 
-$LOCAL_CI_PATH/board_runner.py esp32 
-#
-#else: run this
-#
-
-exit $?
-
-# make clean -C ports/esp32  BOARD_DIR=$ESP32_BOARD_DIR/$ESP32_BOARD
-# make -C ports/esp32  BOARD_DIR=$ESP32_BOARD_DIR/$ESP32_BOARD -j16
+# Multiple boards
+if test "$ESP32_BOARD_RUNNER" == "True";
+    then
+        echo "MODE: [ Board Runner ]"
+        $LOCAL_CI_PATH/board_runner.py esp32 
+        exit $?
+else
+    echo "MODE: [ Single Board ]"
+fi
 
 
-# if [ $? -eq 0 ];
-# then
-#   echo "PORT: esp32 BUILD: [ OK ]"
-# else
-#   echo "PORT: esp32 BUILD: [ FAILED ]" >&2 # STDERR
-#   exit 1
-# fi
+# Single board
 
-# # FLASH
-# if test "$ESP32_FLASH" == "True";
-#     then
-#         echo "Flashing firmware"
-#         make -C ports/esp32 BOARD_DIR=$ESP32_BOARD_DIR/$ESP32_BOARD PORT=$ESP32_DEVICE deploy 
-
-#         flash_result=$?
-
-#         if [ $flash_result -eq 0 ];
-#         then
-#           echo "PORT: esp32 FIRMWARE FLASH: [ OK ]"
-#         else
-#           echo "PORT: esp32 FIRMWARE FLASH: [ FAILED ]" >&2 # STDERR
-#           exit 1
-#         fi
-
-#         sleep 3
-# else 
-#     echo "PORT: esp32 flashing SKIP"
-# fi
-
-# echo "Running tests..."
-# $LOCAL_CI_PATH/device_test_runner.py $ESP32_TEST_BOARD
-
-# test_result=$?
-
-# if [ $test_result -eq 0 ];
-# then
-#   echo "PORT: esp32 TESTS: [ OK ]"
-# else
-#   echo "PORT: esp32 TESTS: [ FAILED ]" >&2 # STDERR
-#   # exit 1
-# fi
+make clean -C ports/esp32  BOARD_DIR=$ESP32_BOARD_DIR/$ESP32_BOARD
+make -C ports/esp32  BOARD_DIR=$ESP32_BOARD_DIR/$ESP32_BOARD -j16
 
 
-# # CI RESULT
-# if [ $test_result -eq 0 ];
-# then
-#     :
-# else 
-#     exit 1 
-# fi 
+if [ $? -eq 0 ];
+then
+  echo "PORT: esp32 BUILD: [ OK ]"
+else
+  echo "PORT: esp32 BUILD: [ FAILED ]" >&2 # STDERR
+  exit 1
+fi
+
+# FLASH
+if test "$ESP32_FLASH" == "True";
+    then
+        echo "Flashing firmware"
+        make -C ports/esp32 BOARD_DIR=$ESP32_BOARD_DIR/$ESP32_BOARD PORT=$ESP32_DEVICE deploy 
+
+        flash_result=$?
+
+        if [ $flash_result -eq 0 ];
+        then
+          echo "PORT: esp32 FIRMWARE FLASH: [ OK ]"
+        else
+          echo "PORT: esp32 FIRMWARE FLASH: [ FAILED ]" >&2 # STDERR
+          exit 1
+        fi
+
+        sleep 3
+else 
+    echo "PORT: esp32 flashing SKIP"
+fi
+
+echo "Running tests..."
+$LOCAL_CI_PATH/device_test_runner.py $ESP32_TEST_BOARD
+
+test_result=$?
+
+if [ $test_result -eq 0 ];
+then
+  echo "PORT: esp32 TESTS: [ OK ]"
+else
+  echo "PORT: esp32 TESTS: [ FAILED ]" >&2 # STDERR
+  # exit 1
+fi
+
+
+# CI RESULT
+if [ $test_result -eq 0 ];
+then
+    :
+else 
+    exit 1 
+fi 

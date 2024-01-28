@@ -23,6 +23,8 @@ PORTS = ["unix", "esp32", "stm32", "rp2"]
 
 COMMON_PATHS = ["py", "extmod", "lib", "tests"]
 
+MPY_CROSS = "make -C mpy-cross"
+
 
 def check_updated_paths(port):
     port_dir = os.path.join("ports", port)
@@ -70,10 +72,12 @@ def run_port_ci(port):
 _run_ci = any([check_updated_paths(port) for port in PORTS])
 
 if _run_ci:
+    subprocess.run(shlex.split(MPY_CROSS))
     if not LOCAL_CI_PARALLEL:
         if any([run_port_ci(port) for port in PORTS]):
             print("Done")
     else:
+        # TODO: run git submodule with lock
         print("Running mode: PARALLEL")
         print("redirecting output to <port>.log")
         with Pool(len(PORTS)) as p:

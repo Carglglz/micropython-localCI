@@ -1,7 +1,7 @@
 #! /usr/bin/bash
 
 
-LOCAL_CI_PATH="tools/local_ci"
+LOCAL_CI_PATH="../localCI"
 STM32_TEST="True"
 STM32_FLASH="True"
 STM32_BOARD="PYBV11"
@@ -14,7 +14,7 @@ source .env
 
 # ports/stm32
 function ci_stm32_pyb_prebuild {
-    make ${MAKEOPTS} -C mpy-cross
+    # make ${MAKEOPTS} -C mpy-cross
     SUBMODULES="lib/libhydrogen lib/stm32lib lib/micropython-lib"
 
     git submodule sync $SUBMODULES
@@ -30,17 +30,22 @@ function ci_stm32_pyb_build {
 }
 
 
-# TODO: multiple boards:
-# add $<PORT>_BOARD_RUNNER = True / False
-# if True
-# call board_runner.py --> allow multiple builds and multiprocessing
-# e.g.
-# $LOCAL_CI_PATH/board_runner.py stm32 --> loads stm32_boards.yaml
-#
-# else run this:
-
 # BUILD
 ci_stm32_pyb_prebuild
+
+
+# Multiple boards
+if test "$STM32_BOARD_RUNNER" == "True";
+    then
+        echo "MODE: [ Board Runner ]"
+        $LOCAL_CI_PATH/board_runner.py stm32 
+        exit $?
+else
+    echo "MODE: [ Single Board ]"
+fi
+
+
+# Single board
 
 ci_stm32_pyb_build
 

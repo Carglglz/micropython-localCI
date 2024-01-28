@@ -14,7 +14,7 @@ source .env
 
 # ports/unix
 function ci_unix_build_helper_remote {
-    make ${MAKEOPTS} -C mpy-cross
+    # make ${MAKEOPTS} -C mpy-cross
     SUBMODULES="lib/mbedtls lib/micropython-lib lib/berkeley-db-1.xx" 
     git submodule sync $SUBMODULES
     git submodule update --init $SUBMODULES

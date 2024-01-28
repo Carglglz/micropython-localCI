@@ -44,13 +44,12 @@ CMD_TESTS = shlex.split(
     f"./run-tests.py --target {get_test_target(PORT)} --device {DEVICE}"
 )
 
+
 if TEST_DEVICE:
     result = subprocess.run(CMD_TESTS, cwd="tests")
     sys.exit(result.returncode)
 else:
     subprocess.run(["echo", "PORT:", PORT, "TESTS: SKIP"])
 
-# TODO: add run-multitest.py for devices
 
-
-# run other tests depending on device or custom tests
+# TODO: add run-multitest.py for devices ?
