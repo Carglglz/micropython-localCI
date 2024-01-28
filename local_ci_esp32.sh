@@ -65,53 +65,67 @@ echo "IDF_PATH:" $IDF_PATH
 ci_esp32_prebuild_remote
 
 # TODO: multiple boards
+# if $<PORT>_BOARD_RUNNER
 # call board_runner.py --> allow build multiple boards and multiprocessing
-# $LOCAL_CI_PATH/board_runner.py esp32 --> loads esp32_boards.yaml
+
+$LOCAL_CI_PATH/board_runner.py esp32 
 #
 #else: run this
-make clean -C ports/esp32  BOARD_DIR=$ESP32_BOARD_DIR/$ESP32_BOARD
-make -C ports/esp32  BOARD_DIR=$ESP32_BOARD_DIR/$ESP32_BOARD -j16
+#
+
+exit $?
+
+# make clean -C ports/esp32  BOARD_DIR=$ESP32_BOARD_DIR/$ESP32_BOARD
+# make -C ports/esp32  BOARD_DIR=$ESP32_BOARD_DIR/$ESP32_BOARD -j16
 
 
-if [ $? -eq 0 ];
-then
-  echo "PORT: esp32 BUILD: [ OK ]"
-else
-  echo "PORT: esp32 BUILD: [ FAILED ]" >&2 # STDERR
-  exit 1
-fi
+# if [ $? -eq 0 ];
+# then
+#   echo "PORT: esp32 BUILD: [ OK ]"
+# else
+#   echo "PORT: esp32 BUILD: [ FAILED ]" >&2 # STDERR
+#   exit 1
+# fi
 
-# FLASH
-if test "$ESP32_FLASH" == "True";
-    then
-        echo "Flashing firmware"
-        GIT_DIR="${PWD}/esp-idf/.git" make -C ports/esp32 PORT=$ESP32_DEVICE deploy 
+# # FLASH
+# if test "$ESP32_FLASH" == "True";
+#     then
+#         echo "Flashing firmware"
+#         make -C ports/esp32 BOARD_DIR=$ESP32_BOARD_DIR/$ESP32_BOARD PORT=$ESP32_DEVICE deploy 
 
-        flash_result=$?
+#         flash_result=$?
 
-        if [ $flash_result -eq 0 ];
-        then
-          echo "PORT: esp32 FIRMWARE FLASH: [ OK ]"
-        else
-          echo "PORT: esp32 FIRMWARE FLASH: [ FAILED ]" >&2 # STDERR
-          exit 1
-        fi
+#         if [ $flash_result -eq 0 ];
+#         then
+#           echo "PORT: esp32 FIRMWARE FLASH: [ OK ]"
+#         else
+#           echo "PORT: esp32 FIRMWARE FLASH: [ FAILED ]" >&2 # STDERR
+#           exit 1
+#         fi
 
-        sleep 3
-else 
-    echo "PORT: esp32 flashing SKIP"
-fi
+#         sleep 3
+# else 
+#     echo "PORT: esp32 flashing SKIP"
+# fi
 
-echo "Running tests..."
-$LOCAL_CI_PATH/device_test_runner.py $ESP32_TEST_BOARD
+# echo "Running tests..."
+# $LOCAL_CI_PATH/device_test_runner.py $ESP32_TEST_BOARD
 
-test_result=$?
+# test_result=$?
 
-if [ $test_result -eq 0 ];
-then
-  echo "PORT: esp32 TESTS: [ OK ]"
-else
-  echo "PORT: esp32 TESTS: [ FAILED ]" >&2 # STDERR
-  # exit 1
-fi
+# if [ $test_result -eq 0 ];
+# then
+#   echo "PORT: esp32 TESTS: [ OK ]"
+# else
+#   echo "PORT: esp32 TESTS: [ FAILED ]" >&2 # STDERR
+#   # exit 1
+# fi
 
+
+# # CI RESULT
+# if [ $test_result -eq 0 ];
+# then
+#     :
+# else 
+#     exit 1 
+# fi 

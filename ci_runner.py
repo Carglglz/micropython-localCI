@@ -5,13 +5,15 @@ import os
 from multiprocessing import Pool
 import ast
 
-LOCAL_CI_PATH = os.getenv("LOCAL_CI_PATH", "tools/local_ci")
+LOCAL_CI_PATH = os.getenv("LOCAL_CI_PATH", ".")
 LOCAL_CI_PORTS = os.getenv("LOCAL_CI_PORTS", "all")
 LOCAL_CI_PARALLEL = ast.literal_eval(os.getenv("LOCAL_CI_PARALLEL", "False"))
 
 _run_ci = False
 
-updated_paths = subprocess.check_output(shlex.split("git diff master... --name-only")).decode()
+updated_paths = subprocess.check_output(
+    shlex.split("git diff master... --name-only")
+).decode()
 
 subprocess.run(["echo", "UPDATED_PATHS:", f"\n{updated_paths}"])
 
@@ -19,7 +21,7 @@ UPDATED_PATHS = updated_paths.splitlines()
 
 PORTS = ["unix", "esp32", "stm32", "rp2"]
 
-COMMON_PATHS = ["py", "extmod", "lib"]
+COMMON_PATHS = ["py", "extmod", "lib", "tests"]
 
 
 def check_updated_paths(port):

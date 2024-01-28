@@ -31,6 +31,8 @@ function ci_stm32_pyb_build {
 
 
 # TODO: multiple boards:
+# add $<PORT>_BOARD_RUNNER = True / False
+# if True
 # call board_runner.py --> allow multiple builds and multiprocessing
 # e.g.
 # $LOCAL_CI_PATH/board_runner.py stm32 --> loads stm32_boards.yaml
@@ -87,3 +89,12 @@ else
   echo "PORT: stm32 TESTS: [ FAILED ]" >&2
   # exit 1
 fi
+
+
+# CI RESULT
+if [ $test_result -eq 0 ];
+then
+    :
+else 
+    exit 1 
+fi 
