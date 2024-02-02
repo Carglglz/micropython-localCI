@@ -5,6 +5,11 @@ import os
 from multiprocessing import Pool
 import ast
 
+
+OK = "\033[92;1mOK\x1b[0m"
+FAILED = "\u001b[31;1mFAILED\u001b[0m"
+RUNNING = "\u001b[32;1mRUNNING\u001b[0m"
+
 LOCAL_CI_PATH = os.getenv("LOCAL_CI_PATH", ".")
 LOCAL_CI_PORTS = os.getenv("LOCAL_CI_PORTS", "all")
 LOCAL_CI_PARALLEL = ast.literal_eval(os.getenv("LOCAL_CI_PARALLEL", "False"))
@@ -49,7 +54,7 @@ def run_port_ci(port):
         _ci_port_runner = os.path.join(LOCAL_CI_PATH, f"local_ci_{port}.sh")
         if os.path.exists(_ci_port_runner):
             if LOCAL_CI_PARALLEL:
-                subprocess.run(["echo", "PORT:", port, "RUNNING"])
+                subprocess.run(["echo", "PORT:", port, f"[ {RUNNING} ]"])
                 with open(f"{port}.log", "w") as portlog:
                     result = subprocess.run(_ci_port_runner, stdout=portlog)
                 # TODO: parse <port.log> grep and evaluate result
@@ -57,15 +62,15 @@ def run_port_ci(port):
                 result = subprocess.run(_ci_port_runner)
 
             if result.returncode == 0:
-                subprocess.run(["echo", "PORT:", port, "[ OK ]"])
+                subprocess.run(["echo", "PORT:", port, f"[ {OK} ]"])
             else:
-                subprocess.run(["echo", "PORT:", port, "[ FAILED ]"])
+                subprocess.run(["echo", "PORT:", port, f"[ {FAILED} ]"])
             return result.returncode
         else:
-            subprocess.run(["echo", "PORT:", port, "SKIP"])
+            subprocess.run(["echo", "PORT:", port, "[\u001b[33;1m SKIP\u001b[0m ]"])
 
     else:
-        subprocess.run(["echo", "PORT:", port, "SKIP"])
+        subprocess.run(["echo", "PORT:", port, "[\u001b[33;1m SKIP\u001b[0m ]"])
 
 
 # Trigger the appropriate local_ci_xx.sh runner

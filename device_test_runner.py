@@ -49,7 +49,7 @@ if TEST_DEVICE:
     result = subprocess.run(CMD_TESTS, cwd="tests")
     sys.exit(result.returncode)
 else:
-    subprocess.run(["echo", "PORT:", PORT, "TESTS: SKIP"])
+    subprocess.run(["echo", "PORT:", PORT, "TESTS: [\u001b[33;1m SKIP\u001b[0m ]"])
 
 
 # TODO: add run-multitest.py for devices ?

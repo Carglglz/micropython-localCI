@@ -1,0 +1,20 @@
+boards:
+ PYBV11:
+     BUILD: true
+     FLASH: true
+     TEST: true # ./run-tests.py
+     JOBS: 10
+     PORT: "/dev/ttyACM0"
+     BOOTLOADER: "tools/mpremote/mpremote.py bootloader"
+     CUSTOM_TESTS:
+
+        TEST_HW:
+         test_dir: "$PWD/tests/ports/stm32"
+         test_files: "*.py"
+         cmd: "./run-tests.py $test_dir/$test_files --target pyboard --device $PORT "
+         cwd: "./tests"
+         env_path: ""
+
+        RESET:
+         cmd: "./tools/mpremote/mpremote.py a0 reset"
+

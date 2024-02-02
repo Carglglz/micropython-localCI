@@ -5,7 +5,13 @@ TOP_MPY_DIR=$PWD
 UNIX_VARIANT="standard" 
 UNIX_VARIANT_DIR=$TOP_MPY_DIR/ports/unix/variants 
 
-echo "PORT: unix CI"
+
+OK="[\u001b[32;1m OK \u001b[0m]"
+FAIL="[\u001b[31;1m FAILED \u001b[0m]"
+SKIP="[\u001b[33;1m SKIP\u001b[0m ]"
+
+
+echo -e "PORT: unix CI [\u001b[32;1m RUNNING \u001b[0m]"
 source tools/ci.sh
 
 # CUSTOM CONFIG
@@ -69,9 +75,9 @@ function ci_unix_run_perfbench {
 ci_unix_standard_build_remote
 if [ $? -eq 0 ];
 then
-  echo "PORT: unix BUILD: [ OK ]"
+  echo -e "PORT: unix BUILD: $OK"
 else
-  echo "PORT: unix BUILD: [ FAILED ]" >&2
+  echo -e "PORT: unix BUILD: $FAIL" >&2
   exit 1
 fi
 
@@ -82,9 +88,9 @@ test_result=$?
 
 if [ $test_result -eq 0 ];
 then
-  echo "PORT: unix TESTS: [ OK ]"
+  echo -e "PORT: unix TESTS: $OK"
 else
-  echo "PORT: unix TESTS: [ FAILED ]" >&2
+  echo -e "PORT: unix TESTS: $FAIL" >&2
   # exit 1
 fi
 
@@ -95,9 +101,9 @@ multi_test_result=$?
 
 if [ $multi_test_result -eq 0 ];
 then
-  echo "PORT: unix MULTINET TESTS: [ OK ]"
+  echo -e "PORT: unix MULTINET TESTS: $OK"
 else
-  echo "PORT: unix MULTINET TESTS: [ FAILED ]" >&2
+  echo -e "PORT: unix MULTINET TESTS: $FAIL" >&2
   # exit 1
 fi
 
@@ -110,9 +116,9 @@ ci_unix_run_perfbench $UNIX_VARIANT
 perfbench_result=$?
 if [ $perfbench_result -eq 0 ];
 then
-  echo "PORT: unix PERFBENCH: [ OK ]"
+  echo -e "PORT: unix PERFBENCH: $OK"
 else
-  echo "PORT: unix PERFBENCH: [ FAILED ]" >&2
+  echo -e "PORT: unix PERFBENCH: $FAIL" >&2
   # exit 1
 fi
 

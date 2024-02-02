@@ -1,0 +1,19 @@
+boards:
+ ESP32_GENERIC:
+     JOBS: 4
+     BUILD: true
+     FLASH: true
+     TEST: true # ./run-tests.py
+     PORT: "/dev/ttyUSB0"
+     CUSTOM_TESTS: 
+
+        TEST_HW: 
+         test_dir: "$PWD/tests/ports/esp32"
+         test_files: "*.py"
+         cmd: "./run-tests.py $test_dir/$test_files --target esp32 --device $PORT "
+         cwd: "./tests"
+         env_path: ""
+
+        RESET:
+         cmd: "./tools/mpremote/mpremote.py u0 reset"
+ 
