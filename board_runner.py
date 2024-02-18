@@ -112,7 +112,21 @@ def clean_board(port, board, board_config, stdout=sys.stdout):
     board_dir = os.path.join(_board_dir, board)
     clean_cmd = f"make clean -C ports/{port} BOARD_DIR={board_dir}"
 
-    result = subprocess.run(shlex.split(clean_cmd), stdout=stdout)
+    clean_opt = board_config.get("CLEAN", True)
+
+    if clean_opt:
+        result = subprocess.run(shlex.split(clean_cmd), stdout=stdout)
+    else:
+        result = 0
+        print(
+            "PORT:",
+            port,
+            "BOARD:",
+            board,
+            " CLEAN [\u001b[33;1m SKIP\u001b[0m ]",
+            flush=True,
+        )
+
     return result
 
 
@@ -231,7 +245,7 @@ def board_runner(
     port, board, board_config, parallel=False, stdout=sys.stdout, clean=True
 ):
     if parallel:
-        subprocess.run(["echo", "PORT:", port, "BOARD:", board, f"[ {RUNNING} ]"])
+        print(*["PORT:", port, "BOARD:", board, f"[ {RUNNING} ]"])
         with open(f"{port}_{board}.log", "w") as boardlog:
             return board_runner(port, board, board_config, stdout=boardlog, clean=False)
     else:
@@ -240,31 +254,33 @@ def board_runner(
                 result = clean_board(port, board, board_config, stdout=stdout)
             result = build_board(port, board, board_config, stdout=stdout)
             if result.returncode == 0:
-                subprocess.run(
-                    ["echo", "PORT:", port, "BOARD:", board, f" BUILD [ {OK} ]"],
-                )
+                print("PORT:", port, "BOARD:", board, f" BUILD [ {OK} ]", flush=True)
             else:
-                subprocess.run(
-                    ["echo", "PORT:", port, "BOARD:", board, f" BUILD [ {FAILED} ]"]
+                print(
+                    "PORT:", port, "BOARD:", board, f" BUILD [ {FAILED} ]", flush=True
                 )
 
                 if board_config.get("CALLBACKS", False):
                     callback = board_config.get("CALLBACKS").get("on_error", {})
 
                     # cb_results = []
-                    cmd = replace_env_var(callback.get("cmd"))
-                    subprocess.run(shlex.split(cmd))
+                    if len(callback) == 1:
+                        cmd = replace_env_var(callback.get("cmd"))
+                        subprocess.run(shlex.split(cmd))
+                    elif len(callback) > 1:
+                        for cb in callback:
+                            cmd = replace_env_var(callback.get(cb).get("cmd"))
+                            subprocess.run(shlex.split(cmd))
+
                 return result.returncode
         else:
-            subprocess.run(
-                [
-                    "echo",
-                    "PORT:",
-                    port,
-                    "BOARD:",
-                    board,
-                    " BUILD [\u001b[33;1m SKIP\u001b[0m ]",
-                ]
+            print(
+                "PORT:",
+                port,
+                "BOARD:",
+                board,
+                " BUILD [\u001b[33;1m SKIP\u001b[0m ]",
+                flush=True,
             )
             if not board_config.get("CUSTOM_TESTS"):
                 return
@@ -273,135 +289,139 @@ def board_runner(
             result = flash_board(port, board, board_config, stdout=stdout)
 
             if result.returncode == 0:
-                subprocess.run(
-                    [
-                        "echo",
-                        "PORT:",
-                        port,
-                        "BOARD:",
-                        board,
-                        f" FIRMWARE FLASH [ {OK} ]",
-                    ]
+                print(
+                    "PORT:",
+                    port,
+                    "BOARD:",
+                    board,
+                    f" FIRMWARE FLASH [ {OK} ]",
+                    flush=True,
                 )
             else:
-                subprocess.run(
-                    [
-                        "echo",
-                        "PORT:",
-                        port,
-                        "BOARD:",
-                        board,
-                        f" FIRMWARE FLASH [ {FAILED} ]",
-                    ]
+                print(
+                    "PORT:",
+                    port,
+                    "BOARD:",
+                    board,
+                    f" FIRMWARE FLASH [ {FAILED} ]",
+                    flush=True,
                 )
 
                 if board_config.get("CALLBACKS", False):
                     callback = board_config.get("CALLBACKS").get("on_error", {})
 
                     # cb_results = []
-                    cmd = replace_env_var(callback.get("cmd"))
-                    subprocess.run(shlex.split(cmd))
+                    if len(callback) == 1:
+                        cmd = replace_env_var(callback.get("cmd"))
+                        subprocess.run(shlex.split(cmd))
+                    elif len(callback) > 1:
+                        for cb in callback:
+                            cmd = replace_env_var(callback.get(cb).get("cmd"))
+                            subprocess.run(shlex.split(cmd))
                 return result.returncode
         else:
             pass
             # return
 
         if board_config.get("TEST", False):
-            subprocess.run(
-                ["echo", "PORT:", port, "BOARD:", board, " Running tests..."]
-            )
+            print("PORT:", port, "BOARD:", board, " Running tests...", flush=True)
             result = test_board(port, board, board_config, stdout=stdout)
 
             if result.returncode == 0:
-                subprocess.run(
-                    ["echo", "PORT:", port, "BOARD:", board, f" TESTS [ {OK} ]"]
-                )
+                print("PORT:", port, "BOARD:", board, f" TESTS [ {OK} ]", flush=True)
             else:
-                subprocess.run(
-                    ["echo", "PORT:", port, "BOARD:", board, f" TESTS [ {FAILED} ]"]
+                print(
+                    "PORT:", port, "BOARD:", board, f" TESTS [ {FAILED} ]", flush=True
                 )
 
                 if board_config.get("CALLBACKS", False):
                     callback = board_config.get("CALLBACKS").get("on_error", {})
 
                     # cb_results = []
-                    cmd = replace_env_var(callback.get("cmd"))
-                    subprocess.run(shlex.split(cmd))
+                    if len(callback) == 1:
+                        cmd = replace_env_var(callback.get("cmd"))
+                        subprocess.run(shlex.split(cmd))
+                    elif len(callback) > 1:
+                        for cb in callback:
+                            cmd = replace_env_var(callback.get(cb).get("cmd"))
+                            subprocess.run(shlex.split(cmd))
                 return result.returncode
 
         if board_config.get("CUSTOM_TESTS", False):
-            subprocess.run(
-                ["echo", "PORT:", port, "BOARD:", board, " Running custom tests..."]
+            print(
+                "PORT:", port, "BOARD:", board, " Running custom tests...", flush=True
             )
             results = test_board_custom(port, board, board_config, stdout=stdout)
             _failed_tests = []
 
             if all([result.returncode == 0 for result in results.values()]):
                 for test, result in results.items():
-                    subprocess.run(
-                        [
-                            "echo",
-                            "PORT:",
-                            port,
-                            "BOARD:",
-                            board,
-                            f"TEST: {test} [ {OK} ]",
-                        ]
+                    print(
+                        "PORT:",
+                        port,
+                        "BOARD:",
+                        board,
+                        f"TEST: {test} [ {OK} ]",
+                        flush=True,
                     )
                 if board_config.get("CALLBACKS", False):
                     callback = board_config.get("CALLBACKS").get("on_success", {})
 
                     # cb_results = []
-                    if callback:
+
+                    if len(callback) == 1:
                         cmd = replace_env_var(callback.get("cmd"))
                         subprocess.run(shlex.split(cmd))
+                    elif len(callback) > 1:
+                        for cb in callback:
+                            cmd = replace_env_var(callback.get(cb).get("cmd"))
+                            subprocess.run(shlex.split(cmd))
 
                 return 0
             else:
                 for test, result in results.items():
                     if result.returncode == 0:
-                        subprocess.run(
-                            [
-                                "echo",
-                                "PORT:",
-                                port,
-                                "BOARD:",
-                                board,
-                                f"TEST: {test} [ {OK} ]",
-                            ]
+                        print(
+                            "PORT:",
+                            port,
+                            "BOARD:",
+                            board,
+                            f"TEST: {test} [ {OK} ]",
+                            flush=True,
                         )
                     else:
                         _failed_tests.append(test)
-                        subprocess.run(
-                            [
-                                "echo",
-                                "PORT:",
-                                port,
-                                "BOARD:",
-                                board,
-                                f"TEST: {test} [ {FAILED} ]",
-                            ]
+                        print(
+                            "PORT:",
+                            port,
+                            "BOARD:",
+                            board,
+                            f"TEST: {test} [ {FAILED} ]",
+                            flush=True,
                         )
 
-                subprocess.run(
-                    [
-                        "echo",
-                        "PORT:",
-                        port,
-                        "BOARD:",
-                        board,
-                        f"TEST: {len(_failed_tests)} [ {FAILED} ]: ",
-                        ", ".join(_failed_tests),
-                    ]
+                print(
+                    "PORT:",
+                    port,
+                    "BOARD:",
+                    board,
+                    f"TEST: {len(_failed_tests)} [ {FAILED} ]: ",
+                    ", ".join(_failed_tests),
+                    flush=True,
                 )
 
                 if board_config.get("CALLBACKS", False):
                     callback = board_config.get("CALLBACKS").get("on_error", {})
 
                     # cb_results = []
-                    if callback:
+
+                    if len(callback) == 1:
                         cmd = replace_env_var(callback.get("cmd"))
                         subprocess.run(shlex.split(cmd))
+                    elif len(callback) > 1:
+                        for cb in callback:
+                            cmd = replace_env_var(callback.get(cb).get("cmd"))
+                            subprocess.run(shlex.split(cmd))
 
                 return -1
 
@@ -419,7 +439,7 @@ def board_runner(
 try:
     boards_config = load_board_config(config_file).get(args.boards, {})
 
-    subprocess.run(["echo", "PORT:", PORT, "BOARDS:", f"[{args.boards}]"])
+    print(*["PORT:", PORT, "BOARDS:", f"[{args.boards}]"])
 except Exception as e:
     print(e)
     sys.exit(1)

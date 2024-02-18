@@ -20,7 +20,7 @@ updated_paths = subprocess.check_output(
     shlex.split("git diff master... --name-only")
 ).decode()
 
-subprocess.run(["echo", "UPDATED_PATHS:", f"\n{updated_paths}"])
+print("UPDATED_PATHS:", f"\n{updated_paths}", flush=True)
 
 UPDATED_PATHS = updated_paths.splitlines()
 
@@ -54,7 +54,7 @@ def run_port_ci(port):
         _ci_port_runner = os.path.join(LOCAL_CI_PATH, f"local_ci_{port}.sh")
         if os.path.exists(_ci_port_runner):
             if LOCAL_CI_PARALLEL:
-                subprocess.run(["echo", "PORT:", port, f"[ {RUNNING} ]"])
+                print("PORT:", port, f"[ {RUNNING} ]", flush=True)
                 with open(f"{port}.log", "w") as portlog:
                     result = subprocess.run(_ci_port_runner, stdout=portlog)
                 # TODO: parse <port.log> grep and evaluate result
@@ -62,15 +62,16 @@ def run_port_ci(port):
                 result = subprocess.run(_ci_port_runner)
 
             if result.returncode == 0:
-                subprocess.run(["echo", "PORT:", port, f"[ {OK} ]"])
+                print("PORT:", port, f"[ {OK} ]", flush=True)
             else:
-                subprocess.run(["echo", "PORT:", port, f"[ {FAILED} ]"])
+                print("PORT:", port, f"[ {FAILED} ]", flush=True)
+            # TODO: add port callbacks? --> e.g. notify
             return result.returncode
         else:
-            subprocess.run(["echo", "PORT:", port, "[\u001b[33;1m SKIP\u001b[0m ]"])
+            print("PORT:", port, "[\u001b[33;1m SKIP\u001b[0m ]", flush=True)
 
     else:
-        subprocess.run(["echo", "PORT:", port, "[\u001b[33;1m SKIP\u001b[0m ]"])
+        print("PORT:", port, "[\u001b[33;1m SKIP\u001b[0m ]", flush=True)
 
 
 # Trigger the appropriate local_ci_xx.sh runner
