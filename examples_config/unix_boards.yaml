@@ -1,0 +1,40 @@
+boards:
+ UNIX_DEV:
+     BUILD: false
+     FLASH: false
+     TEST: true
+     JOBS: 10
+     BOOTLOADER: ""
+     PORT: "/dev/ttyUSB0"
+
+     CUSTOM_TESTS:
+
+      TEST_MULTI_NET: 
+
+       test_dir: "$PWD/tests/multi_net"
+       test_files: "*.py"
+       cmd: "./run-multitests.py $test_dir/$test_files"
+       cwd: "./tests"
+       env_path: ""
+
+      TEST_LVGL_INSTALL:
+        
+         cmd: "python3.9 -m pip install --upgrade pillow"
+         cwd: "../user_modules/lv_binding_micropython/"
+         env_path: ""
+
+      TEST_LVGL:
+        
+         cmd: "python3.9 lvgl/tests/micropy_test/__init__.py --artifact-path=. --mpy-path=../../micropython/ports/unix/build-UNIX_DEV/micropython"
+         cwd: "../user_modules/lv_binding_micropython/"
+         env_path: ""
+
+      TEST_MPY_MBEDTLS:
+
+       test_dir: "$PWD/../user_modules/mpy-mbedtls/tests/"
+       test_files: "*.py"
+       cmd: "./run-tests.py $test_dir/$test_files"
+       cwd: "./tests"
+       env_path: ""
+        
+

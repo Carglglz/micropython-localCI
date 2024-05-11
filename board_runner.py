@@ -121,7 +121,7 @@ def clean_board(port, board, board_config, stdout=sys.stdout):
         print(
             "PORT:",
             port,
-            "BOARD:",
+            "BOARD:" if port != "unix" else "VARIANT:",
             board,
             " CLEAN [\u001b[33;1m SKIP\u001b[0m ]",
             flush=True,
@@ -245,7 +245,15 @@ def board_runner(
     port, board, board_config, parallel=False, stdout=sys.stdout, clean=True
 ):
     if parallel:
-        print(*["PORT:", port, "BOARD:", board, f"[ {RUNNING} ]"])
+        print(
+            *[
+                "PORT:",
+                port,
+                "BOARD:" if port != "unix" else "VARIANT:",
+                board,
+                f"[ {RUNNING} ]",
+            ]
+        )
         with open(f"{port}_{board}.log", "w") as boardlog:
             return board_runner(port, board, board_config, stdout=boardlog, clean=False)
     else:
@@ -254,10 +262,22 @@ def board_runner(
                 result = clean_board(port, board, board_config, stdout=stdout)
             result = build_board(port, board, board_config, stdout=stdout)
             if result.returncode == 0:
-                print("PORT:", port, "BOARD:", board, f" BUILD [ {OK} ]", flush=True)
+                print(
+                    "PORT:",
+                    port,
+                    "BOARD:" if port != "unix" else "VARIANT:",
+                    board,
+                    f" BUILD [ {OK} ]",
+                    flush=True,
+                )
             else:
                 print(
-                    "PORT:", port, "BOARD:", board, f" BUILD [ {FAILED} ]", flush=True
+                    "PORT:",
+                    port,
+                    "BOARD:" if port != "unix" else "VARIANT:",
+                    board,
+                    f" BUILD [ {FAILED} ]",
+                    flush=True,
                 )
 
                 if board_config.get("CALLBACKS", False):
@@ -277,7 +297,7 @@ def board_runner(
             print(
                 "PORT:",
                 port,
-                "BOARD:",
+                "BOARD:" if port != "unix" else "VARIANT:",
                 board,
                 " BUILD [\u001b[33;1m SKIP\u001b[0m ]",
                 flush=True,
@@ -292,7 +312,7 @@ def board_runner(
                 print(
                     "PORT:",
                     port,
-                    "BOARD:",
+                    "BOARD:" if port != "unix" else "VARIANT:",
                     board,
                     f" FIRMWARE FLASH [ {OK} ]",
                     flush=True,
@@ -301,7 +321,7 @@ def board_runner(
                 print(
                     "PORT:",
                     port,
-                    "BOARD:",
+                    "BOARD:" if port != "unix" else "VARIANT:",
                     board,
                     f" FIRMWARE FLASH [ {FAILED} ]",
                     flush=True,
@@ -324,14 +344,33 @@ def board_runner(
             # return
 
         if board_config.get("TEST", False):
-            print("PORT:", port, "BOARD:", board, " Running tests...", flush=True)
+            print(
+                "PORT:",
+                port,
+                "BOARD:" if port != "unix" else "VARIANT:",
+                board,
+                " Running tests...",
+                flush=True,
+            )
             result = test_board(port, board, board_config, stdout=stdout)
 
             if result.returncode == 0:
-                print("PORT:", port, "BOARD:", board, f" TESTS [ {OK} ]", flush=True)
+                print(
+                    "PORT:",
+                    port,
+                    "BOARD:" if port != "unix" else "VARIANT:",
+                    board,
+                    f" TESTS [ {OK} ]",
+                    flush=True,
+                )
             else:
                 print(
-                    "PORT:", port, "BOARD:", board, f" TESTS [ {FAILED} ]", flush=True
+                    "PORT:",
+                    port,
+                    "BOARD:" if port != "unix" else "VARIANT:",
+                    board,
+                    f" TESTS [ {FAILED} ]",
+                    flush=True,
                 )
 
                 if board_config.get("CALLBACKS", False):
@@ -349,7 +388,12 @@ def board_runner(
 
         if board_config.get("CUSTOM_TESTS", False):
             print(
-                "PORT:", port, "BOARD:", board, " Running custom tests...", flush=True
+                "PORT:",
+                port,
+                "BOARD:" if port != "unix" else "VARIANT:",
+                board,
+                " Running custom tests...",
+                flush=True,
             )
             results = test_board_custom(port, board, board_config, stdout=stdout)
             _failed_tests = []
@@ -359,7 +403,7 @@ def board_runner(
                     print(
                         "PORT:",
                         port,
-                        "BOARD:",
+                        "BOARD:" if port != "unix" else "VARIANT:",
                         board,
                         f"TEST: {test} [ {OK} ]",
                         flush=True,
@@ -384,7 +428,7 @@ def board_runner(
                         print(
                             "PORT:",
                             port,
-                            "BOARD:",
+                            "BOARD:" if port != "unix" else "VARIANT:",
                             board,
                             f"TEST: {test} [ {OK} ]",
                             flush=True,
@@ -394,7 +438,7 @@ def board_runner(
                         print(
                             "PORT:",
                             port,
-                            "BOARD:",
+                            "BOARD:" if port != "unix" else "VARIANT:",
                             board,
                             f"TEST: {test} [ {FAILED} ]",
                             flush=True,
@@ -403,7 +447,7 @@ def board_runner(
                 print(
                     "PORT:",
                     port,
-                    "BOARD:",
+                    "BOARD:" if port != "unix" else "VARIANT:",
                     board,
                     f"TEST: {len(_failed_tests)} [ {FAILED} ]: ",
                     ", ".join(_failed_tests),

@@ -81,6 +81,19 @@ else
   exit 1
 fi
 
+
+# UNIX CUSTOM TESTS
+if test "$UNIX_BOARD_RUNNER" == "True";
+    then
+        echo "MODE: [ Board Runner ]"
+
+        micropython=../ports/unix/build-$UNIX_VARIANT/micropython
+        MICROPY_MICROPYTHON=$micropython $LOCAL_CI_PATH/board_runner.py unix 
+        exit $?
+else
+    echo "MODE: [ Single Board ]"
+fi
+
 # TESTS
 echo "Running tests..."
 ci_unix_run_tests $UNIX_VARIANT
